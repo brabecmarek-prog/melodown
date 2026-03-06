@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Melodown</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Titlebar -->
+  <div class="titlebar">
+    <div class="titlebar-left">
+      <div class="logo-dot"></div>
+      <span class="logo-text">melodown</span>
+      <span class="logo-sub">audio harvester</span>
+    </div>
+    <div class="titlebar-right">
+      <div class="status-pill" id="statusPill">idle</div>
+      <div class="win-btn" id="btnMin">&#8211;</div>
+      <div class="win-btn" id="btnMax">&#9633;</div>
+      <div class="win-btn close" id="btnClose">&#10005;</div>
+    </div>
+  </div>
+
+  <div class="app-body">
+
+    <!-- IMPORT -->
+    <div class="section-header">
+      <span class="section-label">IMPORT FROM PLAYLIST</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="card">
+      <div class="import-row">
+        <div class="source-badge spotify">Spotify</div>
+        <input id="spUrl" class="url-input" type="text" placeholder="https://open.spotify.com/playlist/...">
+        <button class="ghost-btn spotify-btn" id="spImport">Import</button>
+      </div>
+      <div class="import-row">
+        <div class="source-badge ytmusic">YT Music</div>
+        <input id="ytUrl" class="url-input" type="text" placeholder="https://music.youtube.com/playlist?list=...">
+        <button class="ghost-btn ytmusic-btn" id="ytImport">Import</button>
+      </div>
+      <p class="import-hint">Paste any public playlist link — no login or API key needed</p>
+    </div>
+
+    <!-- SONGS -->
+    <div class="section-header">
+      <span class="section-label">SONGS</span>
+      <div class="section-line"></div>
+      <span class="song-count" id="songCount"></span>
+    </div>
+    <div class="card song-card">
+
+      <!-- Tab bar -->
+      <div class="tab-bar">
+        <button class="tab active" data-tab="list">Song List</button>
+        <button class="tab" data-tab="paste">Paste / Type</button>
+        <button class="tab" data-tab="file">Load File</button>
+      </div>
+
+      <!-- Song List panel (checklist) -->
+      <div class="tab-panel active" id="panelList">
+        <div class="list-toolbar" id="listToolbar">
+          <div class="list-toolbar-left">
+            <button class="toolbar-btn" id="checkAll">Check All</button>
+            <button class="toolbar-btn" id="uncheckAll">Uncheck All</button>
+            <button class="toolbar-btn danger" id="clearList">Clear</button>
+          </div>
+          <span class="checked-count" id="checkedCount"></span>
+        </div>
+        <div class="song-list" id="songList">
+          <div class="empty-state" id="emptyState">
+            <div class="empty-icon">♪</div>
+            <div class="empty-text">No songs yet</div>
+            <div class="empty-sub">Import a playlist or paste songs below</div>
+          </div>
+        </div>
+        <!-- Inline add -->
+        <div class="list-add-row">
+          <input class="list-add-input" id="addInput" type="text" placeholder="Add a song — Artist & Title, then press Enter">
+        </div>
+      </div>
+
+      <!-- Paste panel -->
+      <div class="tab-panel" id="panelPaste">
+        <textarea id="songInput" placeholder="One song per line — Artist & Song Title&#10;&#10;Adele & Hello&#10;Eminem & Lose Yourself&#10;Daft Punk & Get Lucky"></textarea>
+        <div class="paste-actions">
+          <button class="ghost-btn accent-btn" id="loadFromPaste">Add to List ↑</button>
+        </div>
+      </div>
+
+      <!-- File panel -->
+      <div class="tab-panel" id="panelFile">
+        <div class="file-row">
+          <div class="file-name" id="fileName">No file selected</div>
+          <button class="ghost-btn" id="browseFile">Browse...</button>
+        </div>
+        <textarea id="filePreview" class="file-preview" readonly placeholder="File contents will appear here..."></textarea>
+        <div class="paste-actions">
+          <button class="ghost-btn accent-btn" id="loadFromFile">Add to List ↑</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- OUTPUT -->
+    <div class="section-header">
+      <span class="section-label">OUTPUT FOLDER</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="card">
+      <div class="output-row">
+        <div class="output-path" id="outputPath"></div>
+        <button class="ghost-btn" id="changeOutput">Change</button>
+        <button class="ghost-btn" id="openOutput">Open</button>
+      </div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="section-header">
+      <span class="section-label">PROGRESS</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="card progress-card">
+      <div class="progress-label" id="progressLabel">Ready to download</div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="log-box" id="logBox"></div>
+    </div>
+
+  </div>
+
+  <!-- Action bar -->
+  <div class="action-bar">
+    <button class="ghost-btn" id="openFolderBtn">Open Folder</button>
+    <div class="action-right">
+      <button class="stop-btn" id="stopBtn" disabled>&#9632; Stop</button>
+      <button class="download-btn" id="downloadBtn">&#8595; Download MP3s</button>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
