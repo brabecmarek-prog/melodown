@@ -15,9 +15,6 @@ jobs:
           node-version: '20'
       - run: npm install
       - run: npm run make
-      - name: List output
-        run: Get-ChildItem -Recurse out/
-        shell: pwsh
       - uses: actions/upload-artifact@v4
         with:
           name: melodown-windows
@@ -31,13 +28,23 @@ jobs:
         with:
           node-version: '20'
       - run: npm install
-      - run: npm run make -- --platform darwin
-      - name: List output
-        run: find out/ -type f || echo "out/ not found"
+
+      - name: Build macOS arm64 (Apple Silicon)
+        run: npm run make -- --platform darwin --arch arm64
+
+      - name: Build macOS x64 (Intel)
+        run: npm run make -- --platform darwin --arch x64
+
+      - name: Combine into universal zip
+        run: |
+          mkdir -p out/universal
+          cp out/make/zip/darwin/arm64/*.zip out/universal/Melodown-darwin-universal-arm64.zip
+          cp out/make/zip/darwin/x64/*.zip out/universal/Melodown-darwin-universal-x64.zip
+
       - uses: actions/upload-artifact@v4
         with:
           name: melodown-macos
-          path: out/make/zip/**/*.zip
+          path: out/universal/*.zip
 
   release:
     needs: [build-windows, build-macos]
@@ -53,13 +60,11 @@ jobs:
         with:
           name: melodown-macos
           path: ./macos
-      - name: List files
-        run: find . -type f
       - uses: softprops/action-gh-release@v2
         with:
           files: |
             windows/*.zip
-            macos/**/*.zip
+            macos/*.zip
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
