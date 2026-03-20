@@ -7,7 +7,7 @@ set /p NEW_VERSION="Enter new version (e.g. 1.2.0): "
 if "%NEW_VERSION%"=="" (echo No version entered. Aborting. & pause & exit /b 1)
 
 echo Updating version to %NEW_VERSION%...
-powershell -Command "(Get-Content package.json) -replace '\"version\": \"[^\"]*\"', '\"version\": \"%NEW_VERSION%\"' | Set-Content package.json"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {$content = Get-Content 'package.json' -Raw; $content = $content -replace '\"version\": \"[^\"]*\"', '\"version\": \"%NEW_VERSION%\"'; Set-Content 'package.json' $content}"
 
 echo Pushing to GitHub...
 git add .
@@ -22,10 +22,10 @@ echo   Done! GitHub Actions is now building:
 echo     - Windows ZIP
 echo     - macOS ZIP
 echo.
-echo   Watch the build progress at:
+echo   Watch progress at:
 echo   https://github.com/brabecmarek-prog/melodown/actions
 echo.
-echo   When done (~5 min), both ZIPs will appear at:
+echo   Releases at:
 echo   https://github.com/brabecmarek-prog/melodown/releases
 echo ================================================
 pause
