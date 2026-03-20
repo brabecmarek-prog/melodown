@@ -23,6 +23,10 @@ jobs:
       - name: Build Windows
         run: npm run make
 
+      - name: List output files
+        run: Get-ChildItem -Recurse out/
+        shell: pwsh
+
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
@@ -46,11 +50,14 @@ jobs:
       - name: Build macOS
         run: npm run make -- --platform darwin
 
+      - name: List output files
+        run: find out/ -type f
+
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
         with:
           name: melodown-macos
-          path: out/make/zip/darwin/x64/*.zip
+          path: out/make/zip/darwin/**/*.zip
 
   release:
     needs: [build-windows, build-macos]
@@ -70,12 +77,15 @@ jobs:
           name: melodown-macos
           path: ./macos
 
+      - name: List downloaded files
+        run: find . -type f
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             windows/*.zip
-            macos/*.zip
+            macos/**/*.zip
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
