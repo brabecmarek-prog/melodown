@@ -9,26 +9,16 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build Windows
-        run: npm run make
-
-      - name: List output files
+      - run: npm install
+      - run: npm run make
+      - name: List output
         run: Get-ChildItem -Recurse out/
         shell: pwsh
-
-      - name: Upload Windows artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: melodown-windows
           path: out/make/zip/win32/x64/*.zip
@@ -36,28 +26,18 @@ jobs:
   build-macos:
     runs-on: macos-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build macOS
-        run: npm run make -- --platform darwin
-
-      - name: List output files
-        run: find out/ -type f
-
-      - name: Upload macOS artifact
-        uses: actions/upload-artifact@v4
+      - run: npm install
+      - run: npm run make -- --platform darwin
+      - name: List output
+        run: find out/ -type f || echo "out/ not found"
+      - uses: actions/upload-artifact@v4
         with:
           name: melodown-macos
-          path: out/make/zip/darwin/**/*.zip
+          path: out/make/zip/**/*.zip
 
   release:
     needs: [build-windows, build-macos]
@@ -65,23 +45,17 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download Windows build
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: melodown-windows
           path: ./windows
-
-      - name: Download macOS build
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: melodown-macos
           path: ./macos
-
-      - name: List downloaded files
+      - name: List files
         run: find . -type f
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v2
         with:
           files: |
             windows/*.zip
