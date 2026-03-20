@@ -29,15 +29,13 @@ jobs:
           node-version: '22'
       - run: npm install
       - run: npm run make -- --platform darwin --arch arm64
-      - name: List output
-        run: find out/ -type f
       - uses: actions/upload-artifact@v4
         with:
           name: melodown-macos-arm64
           path: out/make/zip/darwin/arm64/*.zip
 
   build-macos-x64:
-    runs-on: macos-13
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -45,8 +43,6 @@ jobs:
           node-version: '22'
       - run: npm install
       - run: npm run make -- --platform darwin --arch x64
-      - name: List output
-        run: find out/ -type f
       - uses: actions/upload-artifact@v4
         with:
           name: melodown-macos-x64
@@ -70,8 +66,6 @@ jobs:
         with:
           name: melodown-macos-x64
           path: ./macos-x64
-      - name: List all files
-        run: find . -type f
       - uses: softprops/action-gh-release@v2
         with:
           files: |
