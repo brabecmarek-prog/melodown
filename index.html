@@ -7,8 +7,8 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Titlebar -->
-  <div class="titlebar">
+  <!-- Custom titlebar -->
+  <div class="titlebar" id="titlebar">
     <div class="titlebar-left">
       <div class="logo-dot"></div>
       <span class="logo-text">melodown</span>
@@ -16,9 +16,26 @@
     </div>
     <div class="titlebar-right">
       <div class="status-pill" id="statusPill">idle</div>
-      <div class="win-btn" id="btnMin">&#8211;</div>
-      <div class="win-btn" id="btnMax">&#9633;</div>
-      <div class="win-btn close" id="btnClose">&#10005;</div>
+      <div class="win-controls" id="winControls">
+        <div class="win-btn" id="btnMin">&#8211;</div>
+        <div class="win-btn" id="btnMax">&#9633;</div>
+        <div class="win-btn close" id="btnClose">&#10005;</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Update banner -->
+  <div class="update-banner" id="updateBanner" style="display:none">
+    <div class="update-banner-left">
+      <span class="update-icon">↑</span>
+      <div>
+        <div class="update-title">Update available — v<span id="updateVersion"></span></div>
+        <div class="update-sub">You are running v<span id="currentVersion"></span></div>
+      </div>
+    </div>
+    <div class="update-banner-right">
+      <button class="update-install-btn" id="updateInstallBtn">Download &amp; Install</button>
+      <button class="update-dismiss-btn" id="updateDismissBtn">Later</button>
     </div>
   </div>
 
@@ -50,17 +67,15 @@
       <span class="song-count" id="songCount"></span>
     </div>
     <div class="card song-card">
-
-      <!-- Tab bar -->
       <div class="tab-bar">
         <button class="tab active" data-tab="list">Song List</button>
         <button class="tab" data-tab="paste">Paste / Type</button>
         <button class="tab" data-tab="file">Load File</button>
       </div>
 
-      <!-- Song List panel (checklist) -->
+      <!-- Song List panel -->
       <div class="tab-panel active" id="panelList">
-        <div class="list-toolbar" id="listToolbar">
+        <div class="list-toolbar">
           <div class="list-toolbar-left">
             <button class="toolbar-btn" id="checkAll">Check All</button>
             <button class="toolbar-btn" id="uncheckAll">Uncheck All</button>
@@ -75,7 +90,6 @@
             <div class="empty-sub">Import a playlist or paste songs below</div>
           </div>
         </div>
-        <!-- Inline add -->
         <div class="list-add-row">
           <input class="list-add-input" id="addInput" type="text" placeholder="Add a song — Artist & Title, then press Enter">
         </div>
@@ -100,7 +114,6 @@
           <button class="ghost-btn accent-btn" id="loadFromFile">Add to List ↑</button>
         </div>
       </div>
-
     </div>
 
     <!-- OUTPUT -->

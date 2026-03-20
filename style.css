@@ -119,6 +119,7 @@ html, body {
   scrollbar-width: thin;
   scrollbar-color: var(--border2) transparent;
   background: var(--bg);
+  -webkit-app-region: no-drag;
 }
 .app-body::-webkit-scrollbar { width: 5px; }
 .app-body::-webkit-scrollbar-track { background: transparent; }
@@ -498,6 +499,7 @@ textarea::placeholder { color: var(--muted); }
   background: var(--card2);
   border-bottom: 1px solid var(--border);
   gap: 8px;
+  -webkit-app-region: no-drag;
 }
 .list-toolbar-left { display: flex; gap: 6px; }
 
@@ -511,6 +513,9 @@ textarea::placeholder { color: var(--muted); }
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
+  -webkit-app-region: no-drag;
+  position: relative;
+  z-index: 10;
 }
 .toolbar-btn:hover { background: var(--card2); color: var(--text); border-color: var(--accent); }
 .toolbar-btn.danger { color: var(--red); border-color: rgba(217,83,79,0.3); }
@@ -641,3 +646,87 @@ textarea::placeholder { color: var(--muted); }
   background: var(--accent-dim) !important;
   border-color: var(--accent) !important;
 }
+
+/* ── Update banner ────────────────────────────────────────────────────────── */
+.update-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #fff8f0, #fff3e8);
+  border-bottom: 1px solid rgba(201,100,66,0.25);
+  animation: slideDown 0.3s ease;
+  flex-shrink: 0;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-100%); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.update-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.update-icon {
+  width: 32px; height: 32px;
+  background: var(--accent);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.update-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.update-sub {
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 1px;
+}
+
+.update-banner-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.update-install-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius-xs);
+  padding: 7px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 6px var(--accent-glow);
+}
+.update-install-btn:hover {
+  background: var(--accent2);
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+.update-dismiss-btn {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-xs);
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.update-dismiss-btn:hover { color: var(--text2); background: var(--card2); }

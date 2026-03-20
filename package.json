@@ -1,6 +1,6 @@
 {
   "name": "melodown",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "YouTube audio downloader",
   "author": "Melodown",
   "main": "main.js",
@@ -16,7 +16,7 @@
       "makers": [
         {
           "name": "@electron-forge/maker-zip",
-          "platforms": ["win32"]
+          "platforms": ["win32", "darwin"]
         }
       ]
     }
@@ -24,7 +24,7 @@
   "devDependencies": {
     "electron": "33.0.0",
     "@electron-forge/cli": "^7.0.0",
-    "@electron-forge/maker-squirrel": "^7.0.0",
-    "@electron-forge/maker-zip": "^7.0.0"
+    "@electron-forge/maker-zip": "^7.0.0",
+    "@electron-forge/publisher-github": "^7.0.0"
   }
 }

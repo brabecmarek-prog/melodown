@@ -2,13 +2,12 @@
 let outputDir = 'C:\\Users\\Downloads\\Melodown'
 let isDownloading = false
 let fileLoaded = null
-
-// songs = [{ text, checked }]
 let songs = []
+let updateDownloadUrl = ''
 
 const $ = id => document.getElementById(id)
 
-// ── Init ──────────────────────────────────────────────────────────────────
+// ── Single DOMContentLoaded ───────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   $('outputPath').textContent = outputDir
   setupListeners()
@@ -16,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 function setupListeners() {
-  // Window
+  // Window controls
   $('btnMin').onclick   = () => window.api.minimize()
   $('btnMax').onclick   = () => window.api.maximize()
   $('btnClose').onclick = () => window.api.close()
@@ -73,18 +72,35 @@ function setupListeners() {
   $('openFolderBtn').onclick = () => window.api.openFolder(outputDir)
 
   // Import
-  $('spImport').onclick = () => importPlaylist('spotify',  $('spUrl').value.trim())
+  $('spImport').onclick = () => importPlaylist('spotify', $('spUrl').value.trim())
   $('ytImport').onclick = () => importPlaylist('ytmusic', $('ytUrl').value.trim())
 
   // Download / Stop
   $('downloadBtn').onclick = startDownload
   $('stopBtn').onclick     = stopDownload
 
-  // Main process events
+  // Update banner buttons
+  $('updateInstallBtn').onclick = () => window.api.downloadUpdate(updateDownloadUrl)
+  $('updateDismissBtn').onclick = () => {
+    $('updateBanner').style.display = 'none'
+    window.api.dismissUpdate()
+  }
+
+  // Events from main process
   window.api.on('download-progress',  onProgress)
   window.api.on('download-song-done', onSongDone)
   window.api.on('download-complete',  onComplete)
   window.api.on('download-stopped',   onStopped)
+  window.api.on('update-available',   onUpdateAvailable)
+  window.api.on('update-dismissed',   () => { $('updateBanner').style.display = 'none' })
+}
+
+// ── Update banner ─────────────────────────────────────────────────────────
+function onUpdateAvailable({ currentVersion, latestVersion, downloadUrl }) {
+  updateDownloadUrl = downloadUrl
+  $('updateVersion').textContent = latestVersion
+  $('currentVersion').textContent = currentVersion
+  $('updateBanner').style.display = 'flex'
 }
 
 // ── Tabs ──────────────────────────────────────────────────────────────────
@@ -108,121 +124,77 @@ function renderSongList() {
     return
   }
 
-  // Remove empty state if present
-  if (empty.parentNode === list) list.removeChild(empty)
+  // Safely remove empty state if present anywhere in DOM
+  if (empty && empty.parentNode) empty.parentNode.removeChild(empty)
 
-  // Sync DOM — update existing items, add new ones, remove deleted
-  const existing = list.querySelectorAll('.song-item')
-
-  // Remove extra rows
-  while (list.children.length > songs.length) {
-    list.removeChild(list.lastChild)
-  }
-
+  // Rebuild list cleanly
+  list.innerHTML = ''
   songs.forEach((song, i) => {
-    let item = list.children[i]
-    if (!item) {
-      item = createSongItem(i)
-      list.appendChild(item)
-    }
-    updateSongItem(item, song, i)
+    const row = createSongRow()
+    list.appendChild(row)
+    updateSongRow(row, song, i)
   })
 
   updateCounts()
 }
 
-function createSongItem(i) {
+function createSongRow() {
   const item = document.createElement('div')
   item.className = 'song-item'
-
-  const cb = document.createElement('input')
-  cb.type = 'checkbox'
-  cb.className = 'song-checkbox'
-
-  const label = document.createElement('span')
-  label.className = 'song-label'
-
-  const status = document.createElement('span')
-  status.className = 'song-status'
-
-  const removeBtn = document.createElement('button')
-  removeBtn.className = 'song-remove'
-  removeBtn.innerHTML = '&#10005;'
-  removeBtn.title = 'Remove'
-
-  item.appendChild(cb)
-  item.appendChild(label)
-  item.appendChild(status)
-  item.appendChild(removeBtn)
-
-  // Events
-  cb.addEventListener('change', () => {
-    songs[i].checked = cb.checked
-    item.classList.toggle('checked', cb.checked)
-    updateCounts()
-  })
-  item.addEventListener('click', (e) => {
-    if (e.target === cb || e.target === removeBtn) return
-    cb.checked = !cb.checked
-    songs[i].checked = cb.checked
-    item.classList.toggle('checked', cb.checked)
-    updateCounts()
-  })
-  removeBtn.addEventListener('click', (e) => {
-    e.stopPropagation()
-    songs.splice(i, 1)
-    renderSongList()
-  })
-
+  item.innerHTML = `
+    <input type="checkbox" class="song-checkbox">
+    <span class="song-label"></span>
+    <span class="song-status"></span>
+    <button class="song-remove" title="Remove">&#10005;</button>
+  `
   return item
 }
 
-function updateSongItem(item, song, i) {
+function updateSongRow(item, song, i) {
   const cb     = item.querySelector('.song-checkbox')
   const label  = item.querySelector('.song-label')
   const status = item.querySelector('.song-status')
-  const removeBtn = item.querySelector('.song-remove')
+  const remove = item.querySelector('.song-remove')
 
+  // Update content
   cb.checked = song.checked
-  label.textContent = song.text
+  label.textContent  = song.text
   status.textContent = song.statusIcon || ''
 
-  // Re-bind index-sensitive events by replacing the item's data-index
-  item.dataset.index = i
-
-  // Update state class
+  // Update classes
   item.className = 'song-item'
-  if (song.checked) item.classList.add('checked')
+  if (song.checked)            item.classList.add('checked')
   if (song.state === 'downloading') item.classList.add('downloading')
-  if (song.state === 'ok')  item.classList.add('done-ok')
-  if (song.state === 'err') item.classList.add('done-err')
+  if (song.state === 'ok')     item.classList.add('done-ok')
+  if (song.state === 'err')    item.classList.add('done-err')
 
-  // Rebind remove button with correct index
-  const newRemove = removeBtn.cloneNode(true)
-  newRemove.addEventListener('click', (e) => {
-    e.stopPropagation()
-    songs.splice(i, 1)
-    renderSongList()
-  })
-  removeBtn.replaceWith(newRemove)
-
-  // Rebind checkbox + row click
+  // Clone to remove old listeners
   const newCb = cb.cloneNode(true)
   newCb.checked = song.checked
+  cb.replaceWith(newCb)
+
+  const newRemove = remove.cloneNode(true)
+  remove.replaceWith(newRemove)
+
+  // Fresh listeners
   newCb.addEventListener('change', () => {
     songs[i].checked = newCb.checked
     item.classList.toggle('checked', newCb.checked)
     updateCounts()
   })
-  cb.replaceWith(newCb)
 
   item.onclick = (e) => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return
-    const checkbox = item.querySelector('.song-checkbox')
-    checkbox.checked = !checkbox.checked
-    songs[i].checked = checkbox.checked
-    item.classList.toggle('checked', checkbox.checked)
+    if (e.target === newCb || e.target === newRemove) return
+    newCb.checked = !newCb.checked
+    songs[i].checked = newCb.checked
+    item.classList.toggle('checked', newCb.checked)
     updateCounts()
+  }
+
+  newRemove.onclick = (e) => {
+    e.stopPropagation()
+    songs.splice(i, 1)
+    renderSongList()
   }
 }
 
@@ -293,11 +265,8 @@ function startDownload() {
     return
   }
   isDownloading = true
-
-  // Reset states
   songs.forEach(s => { s.state = null; s.statusIcon = null })
   renderSongList()
-
   $('downloadBtn').disabled = true
   $('downloadBtn').textContent = '⏳ Downloading…'
   $('stopBtn').disabled = false
@@ -316,22 +285,17 @@ function stopDownload() {
   setProgress(0, 'Stopping after current song…')
 }
 
-// ── Download event handlers ───────────────────────────────────────────────
+// ── Download events ───────────────────────────────────────────────────────
 function onProgress({ song, index, total }) {
   setProgress(index / total, `[${index + 1}/${total}]  ${song}`)
   setStatus(`downloading ${index + 1}/${total}`, 'var(--amber)')
-  // Mark current song as downloading
   const s = songs.find(x => x.text === song)
   if (s) { s.state = 'downloading'; s.statusIcon = '⏳'; renderSongList() }
 }
 
 function onSongDone({ song, success }) {
   const s = songs.find(x => x.text === song)
-  if (s) {
-    s.state = success ? 'ok' : 'err'
-    s.statusIcon = success ? '✓' : '✗'
-    renderSongList()
-  }
+  if (s) { s.state = success ? 'ok' : 'err'; s.statusIcon = success ? '✓' : '✗'; renderSongList() }
   log(success ? `✓  ${song}` : `✗  ${song}`, success ? 'log-ok' : 'log-err')
 }
 
