@@ -12,6 +12,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {$content = Get-Co
 echo Pushing to GitHub...
 git add .
 git commit -m "Release v%NEW_VERSION%"
+git tag -d v%NEW_VERSION% 2>nul
+git push origin :refs/tags/v%NEW_VERSION% 2>nul
 git tag v%NEW_VERSION%
 git push origin main
 git push origin v%NEW_VERSION%
