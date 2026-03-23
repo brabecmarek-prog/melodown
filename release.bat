@@ -19,14 +19,10 @@ echo Version is now: %VER:"=%
 echo.
 echo Committing and pushing to GitHub...
 git add .
-git status
-git commit -m "Release v%NEW_VERSION%"
-if %errorlevel% neq 0 (
-    echo Nothing new to commit - checking if tag exists...
-)
+git commit --allow-empty -m "Release v%NEW_VERSION%"
 git tag v%NEW_VERSION%
 if %errorlevel% neq 0 (
-    echo Tag already exists! Use a different version number.
+    echo Tag already exists! Delete it first with: git tag -d v%NEW_VERSION%
     pause
     exit /b 1
 )
