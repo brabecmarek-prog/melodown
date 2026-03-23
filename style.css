@@ -36,6 +36,8 @@ html, body {
   font-size: 14px;
   user-select: none;
   -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ── Titlebar ─────────────────────────────────────────────────────────────── */
@@ -43,10 +45,10 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 52px;
+  height: 44px;
   background: var(--bg2);
   border-bottom: 1px solid var(--border);
-  padding: 0 16px 0 20px;
+  padding: 0 8px 0 20px;
   -webkit-app-region: drag;
   flex-shrink: 0;
   box-shadow: var(--shadow);
@@ -56,6 +58,8 @@ html, body {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .logo-dot {
@@ -81,8 +85,20 @@ html, body {
 
 .titlebar-right {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  -webkit-app-region: no-drag;
+  flex-shrink: 0;
+  padding-left: 8px;
+  margin-left: auto;
+}
+
+.win-controls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
   -webkit-app-region: no-drag;
 }
 
@@ -95,31 +111,40 @@ html, body {
   border-radius: 20px;
   padding: 3px 12px;
   letter-spacing: 0.2px;
-  transition: color 0.3s, background 0.3s;
-  margin-right: 6px;
+  transition: color 0.3s, background 0.3s, opacity 0.3s;
+  white-space: nowrap;
 }
+.status-pill.idle { opacity: 0; pointer-events: none; }
 
 .win-btn {
-  width: 26px; height: 26px;
+  width: 32px; height: 32px;
   display: flex; align-items: center; justify-content: center;
   border-radius: var(--radius-xs);
   cursor: pointer;
-  font-size: 12px;
-  color: var(--muted);
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--text2);
+  background: var(--card2);
+  border: 1px solid var(--border);
   transition: background 0.15s, color 0.15s;
+  -webkit-app-region: no-drag;
+  flex-shrink: 0;
+  line-height: 1;
 }
-.win-btn:hover { background: var(--card2); color: var(--text); }
-.win-btn.close:hover { background: var(--red-dim); color: var(--red); }
+.win-btn:hover { background: var(--border2); color: var(--text); }
+.win-btn.close:hover { background: var(--red); color: white; border-color: var(--red); }
 
 /* ── App body ─────────────────────────────────────────────────────────────── */
 .app-body {
   overflow-y: auto;
   padding: 20px 24px 12px;
-  height: calc(100vh - 52px - 60px);
+  height: calc(100vh - 48px - 64px);
   scrollbar-width: thin;
   scrollbar-color: var(--border2) transparent;
   background: var(--bg);
   -webkit-app-region: no-drag;
+  flex: 1;
+  min-height: 0;
 }
 .app-body::-webkit-scrollbar { width: 5px; }
 .app-body::-webkit-scrollbar-track { background: transparent; }
@@ -403,7 +428,7 @@ textarea::placeholder { color: var(--muted); }
 
 /* ── Action bar ───────────────────────────────────────────────────────────── */
 .action-bar {
-  height: 60px;
+  height: 64px;
   background: var(--bg2);
   border-top: 1px solid var(--border);
   display: flex;
@@ -412,6 +437,8 @@ textarea::placeholder { color: var(--muted); }
   padding: 0 24px;
   flex-shrink: 0;
   box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
+  position: relative;
+  z-index: 100;
 }
 
 .action-right { display: flex; gap: 10px; align-items: center; }
@@ -652,11 +679,12 @@ textarea::placeholder { color: var(--muted); }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 24px;
+  padding: 8px 24px;
   background: linear-gradient(135deg, #fff8f0, #fff3e8);
   border-bottom: 1px solid rgba(201,100,66,0.25);
   animation: slideDown 0.3s ease;
   flex-shrink: 0;
+  z-index: 50;
 }
 
 @keyframes slideDown {

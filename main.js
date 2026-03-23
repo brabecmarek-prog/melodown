@@ -43,7 +43,7 @@ function getYtdlp() {
 
 function createWindow() {
   win = new BrowserWindow({
-    width: 960, height: 860, minWidth: 800, minHeight: 720,
+    width: 980, height: 920, minWidth: 820, minHeight: 780,
     frame: false,
     backgroundColor: '#f9f8f6',
     titleBarStyle: isMac ? 'hiddenInset' : 'default',

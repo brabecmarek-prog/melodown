@@ -325,8 +325,15 @@ function setProgress(frac, label) {
 }
 
 function setStatus(text, color) {
-  $('statusPill').textContent = text
-  $('statusPill').style.color = color || 'var(--text2)'
+  const pill = $('statusPill')
+  if (!pill) return
+  pill.textContent = text
+  pill.style.color = color || 'var(--text2)'
+  if (text === 'idle' || text === 'ready') {
+    pill.classList.add('idle')
+  } else {
+    pill.classList.remove('idle')
+  }
 }
 
 function log(text, cls) {
