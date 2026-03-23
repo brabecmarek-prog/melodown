@@ -1,5 +1,5 @@
 // ── State ─────────────────────────────────────────────────────────────────
-let outputDir = 'C:\\Users\\Downloads\\Melodown'
+let outputDir = ''  // set dynamically from main process
 let isDownloading = false
 let fileLoaded = null
 let songs = []
@@ -91,6 +91,8 @@ function setupListeners() {
   window.api.on('download-song-done', onSongDone)
   window.api.on('download-complete',  onComplete)
   window.api.on('download-stopped',   onStopped)
+  window.api.on('download-log',       (msg) => log(msg, 'log-muted'))
+  window.api.on('set-output-dir', (dir) => { outputDir = dir; $('outputPath').textContent = dir })
   window.api.on('update-available',   onUpdateAvailable)
   window.api.on('update-dismissed',   () => { $('updateBanner').style.display = 'none' })
 }

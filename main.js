@@ -9,6 +9,37 @@ let win
 let stopRequested = false
 let downloadProcess = null
 const isMac = process.platform === 'darwin'
+const isWin = process.platform === 'win32'
+
+// Resolve yt-dlp path cross-platform
+function getYtdlp() {
+  if (isWin) {
+    // Try common Windows locations
+    const winPaths = [
+      path.join(os.homedir(), 'AppData', 'Local', 'Programs', 'Python', 'Scripts', 'yt-dlp.exe'),
+      path.join(os.homedir(), 'AppData', 'Local', 'Python', 'pythoncore-3.14-64', 'Scripts', 'yt-dlp.exe'),
+      path.join(os.homedir(), 'AppData', 'Roaming', 'Python', 'Scripts', 'yt-dlp.exe'),
+      'C:\Python312\Scripts\yt-dlp.exe',
+      'C:\Python311\Scripts\yt-dlp.exe',
+      'C:\Python310\Scripts\yt-dlp.exe',
+    ]
+    for (const p of winPaths) {
+      if (fs.existsSync(p)) return p
+    }
+    return 'yt-dlp' // fallback to PATH
+  }
+  // macOS: try common Homebrew paths
+  const candidates = [
+    '/opt/homebrew/bin/yt-dlp',
+    '/usr/local/bin/yt-dlp',
+    '/usr/bin/yt-dlp',
+  ]
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c
+  }
+  return 'yt-dlp'
+}
+
 
 function createWindow() {
   win = new BrowserWindow({
@@ -26,6 +57,8 @@ function createWindow() {
     // Send platform info to renderer
     win.webContents.send('platform', process.platform)
     checkForUpdates()
+    const defaultOutput = path.join(os.homedir(), 'Downloads', 'Melodown')
+    win.webContents.send('set-output-dir', defaultOutput)
   })
 }
 
@@ -186,28 +219,49 @@ ipcMain.handle('start-download', async (_, { songs, outputDir }) => {
     win.webContents.send('download-progress', { song, index: i, total, completed, failed })
 
     await new Promise((resolve) => {
-      // On macOS yt-dlp may be installed via Homebrew at /usr/local/bin or /opt/homebrew/bin
-      const ytdlp = isMac ? 'yt-dlp' : 'yt-dlp'
+      const ytdlpCmd = getYtdlp()
+      win.webContents.send('download-log', `Using yt-dlp: ${ytdlpCmd}`)
+      // On Windows, use % escaping to prevent shell from interpreting % vars
+      const outtmpl = isWin
+        ? path.join(outputDir, '%%(title)s [%%(id)s].%%(ext)s')
+        : path.join(outputDir, '%(title)s [%(id)s].%(ext)s')
       const args = [
         '-x', '--audio-format', 'mp3', '--audio-quality', '192K',
-        '--add-metadata', '--no-playlist', '--quiet', '--no-warnings',
-        '-o', path.join(outputDir, '%(title)s [%(id)s].%(ext)s'),
+        '--add-metadata', '--no-playlist',
+        '--js-runtime', 'node',
+        '-o', outtmpl,
         `ytsearch1:${song} audio`
       ]
-      downloadProcess = spawn(ytdlp, args, {
-        shell: true,
+      downloadProcess = spawn(ytdlpCmd, args, {
+        shell: false,
         env: {
           ...process.env,
-          PATH: process.env.PATH + (isMac ? ':/usr/local/bin:/opt/homebrew/bin' : '')
+          PATH: isWin
+            ? process.env.PATH
+            : '/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:' + (process.env.PATH || '')
         }
       })
+      let stderr = ''
+      downloadProcess.stderr.on('data', d => { stderr += d.toString() })
+      downloadProcess.stdout.on('data', d => {
+        win.webContents.send('download-log', d.toString().trim())
+      })
       const done = (code) => {
-        if (code === 0) { completed++; win.webContents.send('download-song-done', { song, success: true, completed, failed, total }) }
-        else            { failed++;    win.webContents.send('download-song-done', { song, success: false, completed, failed, total }) }
+        if (code === 0) {
+          completed++
+          win.webContents.send('download-song-done', { song, success: true, completed, failed, total })
+        } else {
+          failed++
+          win.webContents.send('download-song-done', { song, success: false, completed, failed, total, error: stderr })
+          win.webContents.send('download-log', `Error: ${stderr || 'exit code ' + code}`)
+        }
         resolve()
       }
       downloadProcess.on('close', done)
-      downloadProcess.on('error', () => done(1))
+      downloadProcess.on('error', (e) => {
+        win.webContents.send('download-log', `Spawn error: ${e.message}`)
+        done(1)
+      })
     })
   }
   win.webContents.send('download-complete', { completed, failed, total, outputDir })
