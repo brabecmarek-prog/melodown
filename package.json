@@ -1,12 +1,13 @@
 {
   "name": "melodown",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "YouTube audio downloader",
   "author": "Melodown",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "make": "electron-forge make --targets @electron-forge/maker-zip"
+    "make": "electron-forge make --targets @electron-forge/maker-zip",
+    "test": "node --test"
   },
   "config": {
     "forge": {

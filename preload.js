@@ -6,12 +6,13 @@ contextBridge.exposeInMainWorld('api', {
   close: () => ipcRenderer.send('win-close'),
   pickFolder: () => ipcRenderer.invoke('pick-folder'),
   pickFile: () => ipcRenderer.invoke('pick-file'),
-  openFolder: (p) => ipcRenderer.send('open-folder', p),
+  setOutputDir: (outputDir) => ipcRenderer.invoke('set-output-dir', outputDir),
+  openFolder: (targetPath) => ipcRenderer.send('open-folder', targetPath),
   fetchPlaylist: (args) => ipcRenderer.invoke('fetch-playlist', args),
   startDownload: (args) => ipcRenderer.invoke('start-download', args),
   stopDownload: () => ipcRenderer.send('stop-download'),
   downloadUpdate: (url) => ipcRenderer.send('download-update', url),
   dismissUpdate: () => ipcRenderer.send('dismiss-update'),
   on: (channel, cb) => ipcRenderer.on(channel, (_, data) => cb(data)),
-  off: (channel) => ipcRenderer.removeAllListeners(channel)
+  off: (channel) => ipcRenderer.removeAllListeners(channel),
 })
